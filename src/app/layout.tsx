@@ -19,9 +19,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <Head>
-        <link href="https://ui.michoacan.gob.mx/static/css/main.edcd66f5.css" rel="stylesheet" />
-      </Head>
+       
+       
       <body className={inter.className}>{children}</body>
     </html>
   )
