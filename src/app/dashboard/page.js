@@ -20,8 +20,7 @@ export default function Page() {
       <div className="card">
 
         <div className="bg-white flex flex-col items-center justify-center">
-          <Table></Table>
-        
+         
           </div>
 
 
