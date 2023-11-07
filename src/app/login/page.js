@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Header from '../../../public/components/Header';  
 import Button from '../../../public/components/Button'; 
 import Input from '../../../public/components/Input';
+import Image from 'next/image';
 
  
 import styles from './style.css';
@@ -26,8 +27,12 @@ function Login() {
       <div className="card justify-center">
 
       <div style={leftSectionStyle} className="row padding-elements">
-        {/* Logo */}
-        <img src="https://ui.michoacan.gob.mx/static/media/LogoGobMich-Artboard1.21e8f905786dd1536f8c.png" alt="Logo"   style={logoStyle} />
+          <Image
+        src="/ruta/a/la/imagen.png" // Ruta a la imagen en tu proyecto
+        alt="Logo" 
+        style={logoStyle}
+      />
+      
       </div>
  
 
