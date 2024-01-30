@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useUser } from "src/app/UserContext";
+import { useUser } from "@/app/UserContext";
 import { useRouter } from "next/navigation";
-import { useDarkMode } from "src/app/DarkModeContext";
-import bannerImage from '@public/components/banner.png';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useDarkMode } from "@/app/DarkModeContext";
+ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
 function Header() {

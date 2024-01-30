@@ -111,12 +111,10 @@ const RegistroPersonaFisica = () => {
     primer_apellido: "",
     segundo_apellido: "",
     razon_social: "",
-    clave_acceso: "",
-    clave_acceso_repetida: "",
   });
 
+  const handleComprobar = (formData) => {
 
-  const handleComprobar = async (formData)  => { 
 
     handleComprobarCorreo(formData)
 
@@ -159,90 +157,37 @@ const RegistroPersonaFisica = () => {
       });
 
       */
-  }; 
+  };
 
-  
-  const handleComprobarCorreo = async (formData) => {
-    try {
-      const response = await axios.post(
-        'https://ypt60whgr5.execute-api.us-east-1.amazonaws.com/dev/validar-telefono-vum/validar',
+  const handleComprobarCorreo = (formData) => {
+    axios
+      .post(
+        //"https://5vx83d9dgk.execute-api.us-east-1.amazonaws.com/validar-telefono-vum/validar",
+        END_POINT_BACK + "/validar-telefono-vum/validar",
         {
-         // body: {
+          body: {
             tipo: "correo_electronico",
             correo_electronico: formDataRegistro.correo,
             codigo_validacion: formData.correo,
-         // },
+          },
         }
-      );
+      )
+      .then((response) => {
 
+        if (response.data.statusCode == 400) {
+          setNotificacion({ tipo: "warning", mensaje: "Codigo no valido" });
+        }
 
-      setShowModalTelefono(false);  
+        if (response.data.statusCode == 200) {
+          setNotificacion({ tipo: "success", mensaje: "Codigo Valido" });
 
-      if (!response.data['valido']) {
-        setNotificacion({ tipo: "warning", mensaje: "Codigo no valido" });
-      }
-  
-      if (response.data['valido']) {
-        setNotificacion({ tipo: "success", mensaje: "Codigo Valido" });
-  
-       
-  
-          try {
-            const response = await axios.post('https://ypt60whgr5.execute-api.us-east-1.amazonaws.com/Stage/sap/direccion', {
-                cp: formDataDomicilio.codigo_postal,
-            });
-            
-            let arregloresultados = response.data['Direcciones']['TB_RESULTADO']
-    
-            const referenciaPais = "País";
-            const referenciaEstado = "Estado";
-            const referenciaMunicipio = "Municipio";
-            const referenciaLocalidad = "Localidad";
-    
-            const pais = arregloresultados.find(objeto => objeto.REFERENCIA === referenciaPais);
-            const estado = arregloresultados.find(objeto => objeto.REFERENCIA === referenciaEstado);
-            const municipio = arregloresultados.find(objeto => objeto.REFERENCIA === referenciaMunicipio);
-            const localidad = arregloresultados.find(objeto => objeto.REFERENCIA === referenciaLocalidad);
-    
-            if(estado['IDENTIFICADOR'] == 'MCH'){
-              setMunicipioSeleccionado(municipio)
-              setLocalidadSeleccionado(localidad)
-              setCPSeleccionado(formDataDomicilio.codigo_postal);
-              setTimeout(() => {
-                 
-                obtenerColonias(municipio,localidad);        
-              }, 2000);
-            }else{
-              setIsLoading(false); 
-    
-              setShowCP(true);
-              setShowEstadoEditar(false);
-              setShowMunicipioEditar(false);
-              setShowLocalidadEditar(false);
-              setShowColoniaEditar(false);
-    
-              setFormDataDomicilio((prevData) => ({
-                ...prevData,
-                estado: "",
-                municipio: "",
-                localidad: "",
-                colonia: "",
-              }));
-              setCurrentStep(3);
-    
-    
-    
-    
-    
-            }
-         } catch (error) {
-            console.error('Error en la petición:', error);
-        }  
-      
-      }
-    } catch (error) {
-      console.error("Error en la petición:", error);
-    }
+          closeModalDatos();
+          setCurrentStep(3);
+        }
+      })
+      .catch((error) => {
+        console.error("Error en la petición:", error);
+      });
   };
 
   const [formDataValidaciones, setFormDataValidaciones] = useState({
@@ -261,8 +206,6 @@ const RegistroPersonaFisica = () => {
     primer_apellido: "",
     segundo_apellido: "",
     razon_social: "",
-    clave_acceso: "",
-    clave_acceso_repetida: "",
   });
 
   const [errorsRegistro, setErrorsRegistro] = useState({
@@ -276,8 +219,6 @@ const RegistroPersonaFisica = () => {
     confirmacion_correo: false,
     telefono_celular: false,
     telefono_residencial: false,
-    clave_acceso: false,
-    clave_acceso_repetida: false,
   });
 
 
@@ -297,8 +238,6 @@ const RegistroPersonaFisica = () => {
       "correo",
       "confirmacion_correo",
       "telefono_celular",
-      "clave_acceso",
-      "clave_acceso_repetida",
     ];
 
     switch (fieldName) {
@@ -340,13 +279,6 @@ const RegistroPersonaFisica = () => {
             ? ""
             : "El número de teléfono residencial debe contener 9 dígitos.";
         }
-        break;
-      case "clave_acceso":
-      case "clave_acceso_repetida":
-        // Agrega la lógica de validación para las claves de acceso si es necesario
-        // Puedes definir las reglas según tus requisitos
-        break;
-      default:
         break;
     }
 
@@ -400,13 +332,7 @@ const RegistroPersonaFisica = () => {
         /^[\d\s()-]*$/.test(formDataRegistro.telefono_celular) &&
         (formDataRegistro.telefono_residencial.trim() === "" ||
           (formDataRegistro.telefono_residencial.length === 10 &&
-            /^[\d\s()-]*$/.test(formDataRegistro.telefono_residencial))) &&
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(
-          formDataRegistro.clave_acceso
-        ) &&
-        formDataRegistro.clave_acceso.trim() ===
-          formDataRegistro.clave_acceso_repetida.trim();
-
+            /^[\d\s()-]*$/.test(formDataRegistro.telefono_residencial)));
       updatedErrorMessages.curp =
         /^[A-Za-z]{4}[0-9]{6}[A-Za-z0-9]{8}$/.test(formDataRegistro.curp) &&
         formDataRegistro.curp.trim() !== ""
@@ -456,20 +382,7 @@ const RegistroPersonaFisica = () => {
         /^[\d\s()-]*$/.test(formDataRegistro.telefono_residencial)
           ? ""
           : "Mensaje de error para Teléfono Residencial (solo debe contener dígitos, espacios y paréntesis)";
-
-      updatedErrorMessages.clave_acceso =
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(
-          formDataRegistro.clave_acceso
-        )
-          ? ""
-          : "Mensaje de error para Contraseña (debe contener al menos una letra mayúscula, un número, un símbolo y tener al menos 8 caracteres)";
-
-      updatedErrorMessages.clave_acceso_repetida =
-        formDataRegistro.clave_acceso_repetida.trim() ===
-        formDataRegistro.clave_acceso.trim()
-          ? ""
-          : "Mensaje de error para Confirmación de Contraseña (debe coincidir con la contraseña principal)";
-
+ 
       if (
         Object.values(updatedErrorMessages).some((message) => message !== "")
       ) {
@@ -1211,7 +1124,49 @@ const RegistroPersonaFisica = () => {
 
 
   const realizarPeticion = async ()  => {
+
+    actualizarFormDataDomicilio({
+      estado: informacionGuardada.nombreEntidadFederativa,
+      municipio: informacionGuardada.nombreMunicipio,
+      localidad: informacionGuardada.nombreLocalidad,
+      colonia: informacionGuardada.nombreColonia,
+      codigo_postal: informacionGuardada.codigoPostal,
+      calle: informacionGuardada.nombreVialidad,
+      numero_exterior: informacionGuardada.numeroExterior,
+      numero_interior: informacionGuardada.numeroInterior,
+      entre_calle:
+        informacionGuardada.entreCalle + " " + informacionGuardada.yCalle,
+      referencia: "",
+    });
+
+    // Para pruebas eliminar
+
+ 
+    actualizarFormDataRegistro({
+      rfc: informacionGuardada.rfc,
+     // correo: response.data.body.informacion.datosAdicionales.emailAddress,
+     // confirmacion_correo: response.data.body.informacion.datosAdicionales.emailAddress, 
+      //correo: 'cesar.santiago@sweettech.io',
+      //confirmacion_correo: 'cesar.santiago@sweettech.io', 
+
+      correo: 'csantiago@ehre-evolution.com',
+      confirmacion_correo: 'csantiago@ehre-evolution.com', 
+
+       
+
+      curp: informacionGuardada.curp,
+      nombre: informacionGuardada.nombre,
+      primer_apellido: informacionGuardada.primerApellido,
+      segundo_apellido: informacionGuardada.segundoApellido,
+    });
+
+  
+    setIsLoading(false); 
+    setCurrentStep(2);
+
+    /*
     
+
        const base64Stringcertificado = await convertFileToBase64(formDataDocumentacion.certificado);
        const base64Stringclaveprivada = await convertFileToBase64(formDataDocumentacion.clave_privada);
        
@@ -1281,7 +1236,9 @@ const RegistroPersonaFisica = () => {
         console.error('Error en la petición:', error);
       }
     });
- 
+
+
+    */
   };
 
 
@@ -1339,37 +1296,7 @@ const RegistroPersonaFisica = () => {
      
       }
       if (currentStep === 2) {
-
-        setIsLoading(true);
-
-        axios.post( 'https://ypt60whgr5.execute-api.us-east-1.amazonaws.com/dev/validar-correo-vum' , 
-          {
-          //body: {
-            correo_electronico: formDataRegistro.correo
-          //}
-        })
-          .then(response => {
-             console.log(); 
-
-            if(response.data['mensaje'] != 'Se envío correo de validación'){ 
-              setNotificacion({ tipo: 'warning', mensaje: 'Codigo no valido' });
-  
-            }
-  
-            if(response.data['mensaje'] == 'Se envío correo de validación'){ 
-               setShowModalTelefono(true);  
-            }
-            
-             
-           
-           })
-          .catch(error => {
-            console.error('Error en la petición:', error);
-          });
-  
-
-        
-        /*
+ 
         setIsLoading(true); 
   
   
@@ -1424,8 +1351,6 @@ const RegistroPersonaFisica = () => {
        } catch (error) {
           console.error('Error en la petición:', error);
       }
-
-      */
  
    
   
@@ -2839,86 +2764,7 @@ const obtenerOficina = async (municipio) => {
                             </div>
                           </div>
 
-                          <div className="row">
-                            <div className="col-sm-12 col-md-6">
-                              <div className="col-12">
-                                <label className="label-form">
-                                  Contraseña (*)
-                                </label>
-                                <FontAwesomeIcon
-                                  icon={faQuestionCircle}
-                                  style={{
-                                    marginLeft: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    openModal(
-                                      "Contraseña ",
-                                      '<label className="label-form">Crea tu contraseña. Debe contener al menos una mayúscula, una minúscula y un carácter especial.<br />Ejemplo: MiContrasena_123<br /></label>'
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="col-12">
-                                <Input
-                                  id="clave_accesoInput"
-                                  type="password"
-                                  iconClass="icon-container-registro"
-                                  value={formDataRegistro.clave_acceso}
-                                  onChange={(value) =>
-                                    handleInputChangeRegistro(
-                                      "clave_acceso",
-                                      value
-                                    )
-                                  }
-                                  error={
-                                    errorsRegistro.clave_acceso
-                                      ? "Por favor, ingrese una contraseña válida."
-                                      : ""
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <div className="col-sm-12 col-md-6">
-                              <div className="col-12">
-                                <label className="label-form">
-                                  Contraseña Repetida (*)
-                                </label>
-                                <FontAwesomeIcon
-                                  icon={faQuestionCircle}
-                                  style={{
-                                    marginLeft: "5px",
-                                    cursor: "pointer",
-                                  }}
-                                  onClick={() =>
-                                    openModal(
-                                      "Contraseña Repetida",
-                                      '<label className="label-form">    Repite tu contraseña para confirmar                            <br /></label>'
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="col-12">
-                                <Input
-                                  id="clave_acceso_repetidaInput"
-                                  type="password"
-                                  iconClass="icon-container-registro"
-                                  value={formDataRegistro.clave_acceso_repetida}
-                                  onChange={(value) =>
-                                    handleInputChangeRegistro(
-                                      "clave_acceso_repetida",
-                                      value
-                                    )
-                                  }
-                                  error={
-                                    errorsRegistro.clave_acceso_repetida
-                                      ? "Por favor, ingrese una contraseña válida."
-                                      : ""
-                                  }
-                                />
-                              </div>
-                            </div>
-                          </div>
+                           
                         </div>
                       </div>
                     </div>
@@ -2969,19 +2815,7 @@ const obtenerOficina = async (municipio) => {
                                   <p className="error-message">
                                     {errorMessagesRegistro.telefono_residencial}
                                   </p>
-                                )}
-                                {errorMessagesRegistro.clave_acceso && (
-                                  <p className="error-message">
-                                    {errorMessagesRegistro.clave_acceso}
-                                  </p>
-                                )}
-                                {errorMessagesRegistro.clave_acceso_repetida && (
-                                  <p className="error-message">
-                                    {
-                                      errorMessagesRegistro.clave_acceso_repetida
-                                    }
-                                  </p>
-                                )}
+                                )} 
                               </div>
                             </div>
                           </div>
@@ -3668,13 +3502,10 @@ const obtenerOficina = async (municipio) => {
                           <input
                             type="button"
                             name="next-step"
-                           // className={`cta ${!(requiredFilesLoaded && contribuyentenuevo) ? "cta--disable" : "cta--guinda"}`}
-                           className={`cta ${!(requiredFilesLoaded) ? "cta--disable" : "cta--guinda"}`}
-
+                            className={`cta ${!(requiredFilesLoaded && contribuyentenuevo) ? "cta--disable" : "cta--guinda"}`}
                             value={isLoading ? "Cargando..." : "Siguiente"}
                             onClick={handleNextStep}
-                           // disabled={(!requiredFilesLoaded && contribuyentenuevo)}
-                           disabled={(!requiredFilesLoaded)}
+                            disabled={(!requiredFilesLoaded && contribuyentenuevo)}
                           />
                         )}
                         {currentStep === 2 && (

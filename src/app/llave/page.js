@@ -10,8 +10,8 @@ import Footer from "@public/components/Footer";
 
 import styles from './style.css';
 import { useRouter } from 'next/navigation';
-import { useUser } from 'src/app/UserContext';
-import { useDarkMode } from 'src/app/DarkModeContext';
+import { useUser } from '@/app/UserContext';
+import { useDarkMode } from '@/app/DarkModeContext';
 import getConfig from '@raiz/config';
 
 import ModalRFCLlave from "@public/components/ModalRFCLlave"; // Asegúrate de ajustar la ruta de importación
